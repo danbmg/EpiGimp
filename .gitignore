@@ -25,3 +25,11 @@ nanotekspice
 Nts/file/
 rom.bin
 G-OOP-400_nanotekspice/
+
+# Node / Electron Forge
+node_modules/
+.vite/
+out/
+coverage/
+*.log
+node_modules
