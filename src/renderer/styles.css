@@ -54,8 +54,18 @@ body {
 
 .canvas-area {
   grid-area: canvas;
+  position: relative;
   overflow: hidden;
   background: var(--bg-canvas);
+}
+
+/* Taken out of the layout flow so its buffer size can never push the grid and cause a resize loop. */
+.screen-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .layers-panel {
@@ -66,10 +76,6 @@ body {
 .panel {
   background: var(--bg-panel);
   overflow: auto;
-}
-
-.panel,
-.canvas-area {
   display: flex;
   align-items: center;
   justify-content: center;

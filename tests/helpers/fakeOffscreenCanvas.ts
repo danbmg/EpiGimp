@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
-// Vitest runs in Node, which has no canvas. This fake only records its size, which is enough to test
-// the data model; real pixels are checked in the Electron app.
+// Vitest runs in Node, which has no canvas. This fake records its size and accepts drawing calls without
+// producing pixels, which is enough to test the logic; real pixels are checked in the Electron app.
 export class FakeOffscreenCanvas {
   width: number;
   height: number;
@@ -9,6 +9,10 @@ export class FakeOffscreenCanvas {
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
+  }
+
+  getContext(): { fillStyle: string; fillRect: () => void } {
+    return { fillStyle: '', fillRect: () => undefined };
   }
 }
 
