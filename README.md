@@ -34,6 +34,7 @@ This starts the Vite dev server and opens the EpiGimp window. Renderer changes r
 | `npm run lint` | Lint the code with ESLint |
 | `npm run typecheck` | Check types with the TypeScript compiler (`tsc --noEmit`) |
 | `npm test` | Run the unit tests with Vitest |
+| `npm run check` | Run typecheck, lint and tests in a row (stops at the first failure) |
 | `npm run package` | Package the app for the current platform into `out/` |
 | `npm run make` | Build distributable installers into `out/make/` |
 

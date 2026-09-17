@@ -26,9 +26,11 @@ const createWindow = (): void => {
   // Dev: page served by the Vite dev server (hot reload). Packaged app: built HTML file.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
-    // The native menu is removed (see below), so give DevTools a shortcut back in development.
+    // The native menu is removed (see below), so give DevTools its usual shortcuts back in development.
     mainWindow.webContents.on('before-input-event', (_event, input) => {
-      if (input.type === 'keyDown' && input.key === 'F12') {
+      const isF12 = input.key === 'F12';
+      const isCtrlShiftI = input.control && input.shift && input.key.toLowerCase() === 'i';
+      if (input.type === 'keyDown' && (isF12 || isCtrlShiftI)) {
         mainWindow.webContents.toggleDevTools();
       }
     });
