@@ -1,0 +1,130 @@
+:root {
+  --bg-app: #2b2b2b;
+  --bg-panel: #353535;
+  --bg-canvas: #1e1e1e;
+  --bg-hover: #4a4a4a;
+  --border: #1a1a1a;
+  --text: #dddddd;
+  --text-muted: #8a8a8a;
+
+  --menubar-height: 30px;
+  --toolbar-width: 64px;
+  --layers-width: 240px;
+
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg-app);
+}
+
+/* Main layout: menu bar on top, then toolbar | canvas | layers.
+   Side panels keep a fixed width; the canvas column takes all remaining space,
+   so only the canvas grows or shrinks when the window is resized. */
+.app {
+  display: grid;
+  grid-template-areas:
+    'menubar menubar menubar'
+    'toolbar canvas  layers';
+  grid-template-columns: var(--toolbar-width) minmax(0, 1fr) var(--layers-width);
+  grid-template-rows: var(--menubar-height) minmax(0, 1fr);
+  height: 100vh;
+  user-select: none;
+}
+
+.menubar {
+  grid-area: menubar;
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar {
+  grid-area: toolbar;
+  border-right: 1px solid var(--border);
+}
+
+.canvas-area {
+  grid-area: canvas;
+  overflow: hidden;
+  background: var(--bg-canvas);
+}
+
+.layers-panel {
+  grid-area: layers;
+  border-left: 1px solid var(--border);
+}
+
+.panel {
+  background: var(--bg-panel);
+  overflow: auto;
+}
+
+.panel,
+.canvas-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder {
+  color: var(--text-muted);
+}
+
+/* Menus */
+.menu {
+  position: relative;
+}
+
+.menu-title,
+.menu-items button {
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.menu-title {
+  height: 100%;
+  padding: 0 12px;
+}
+
+.menu-title:hover,
+.menu-title[aria-expanded='true'],
+.menu-items button:not(:disabled):hover {
+  background: var(--bg-hover);
+}
+
+.menu-items {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  min-width: 160px;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+}
+
+.menu-items button {
+  width: 100%;
+  padding: 6px 16px;
+  text-align: left;
+}
+
+.menu-items button:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}

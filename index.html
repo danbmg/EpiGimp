@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>EpiGimp</title>
+  </head>
+  <body>
+    <div class="app">
+      <header id="menubar" class="menubar">
+        <div class="menu">
+          <button class="menu-title" aria-haspopup="true" aria-expanded="false">File</button>
+          <ul class="menu-items" role="menu" hidden>
+            <li><button role="menuitem" disabled>New…</button></li>
+            <li><button role="menuitem" disabled>Open…</button></li>
+            <li><button role="menuitem" disabled>Export…</button></li>
+          </ul>
+        </div>
+      </header>
+
+      <aside id="toolbar" class="panel toolbar">
+        <span class="placeholder">Tools</span>
+      </aside>
+
+      <main id="canvas-area" class="canvas-area">
+        <span class="placeholder">Canvas</span>
+      </main>
+
+      <aside id="layers-panel" class="panel layers-panel">
+        <span class="placeholder">Layers</span>
+      </aside>
+    </div>
+
+    <script type="module" src="/src/renderer/index.ts"></script>
+  </body>
+</html>

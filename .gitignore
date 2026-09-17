@@ -33,3 +33,6 @@ out/
 coverage/
 *.log
 node_modules
+
+# Personal notes
+learning.md
