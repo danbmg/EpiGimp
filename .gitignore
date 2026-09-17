@@ -12,6 +12,7 @@
 *.pdf
 *.txt
 .discord.env
+epigimp.md
 zip/
 .claude/
 *gcno
