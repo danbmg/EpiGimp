@@ -16,6 +16,6 @@
     "forge.env.d.ts",
     "forge.config.ts",
     "vite.*.config.ts",
-    "vitest.config.ts"
+    "vitest.config.mts"
   ]
 }
