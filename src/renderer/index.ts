@@ -9,7 +9,10 @@ const DEFAULT_DOCUMENT_WIDTH = 800;
 const DEFAULT_DOCUMENT_HEIGHT = 600;
 
 initMenuBar(getElement('menubar'));
-initCanvasView(getElement('canvas-area'), createDocument(DEFAULT_DOCUMENT_WIDTH, DEFAULT_DOCUMENT_HEIGHT));
+// Until the brush and eraser exist (#6), strokes are only logged: open DevTools (F12) to see them.
+initCanvasView(getElement('canvas-area'), createDocument(DEFAULT_DOCUMENT_WIDTH, DEFAULT_DOCUMENT_HEIGHT), {
+  onStrokeEnd: (stroke) => console.log(`Stroke: ${stroke.length} points`, stroke),
+});
 
 function getElement(id: string): HTMLElement {
   const element = document.getElementById(id);

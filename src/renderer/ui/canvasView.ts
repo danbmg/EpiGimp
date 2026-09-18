@@ -1,13 +1,15 @@
 import type { Document } from '../core/document';
 import { Compositor } from '../render/compositor';
 import { Viewport, type Point } from '../render/viewport';
+import { StrokeRecorder, type StrokeListener } from '../tools/strokeRecorder';
 
 /** Zoom change per wheel pixel: one mouse wheel notch (deltaY = 100) zooms by about 22%. */
 const ZOOM_SPEED = 0.002;
 
 // Creates the visible canvas inside `container`, draws `doc` on it and handles navigation:
 // Ctrl + wheel zooms, Space + drag or wheel / two-finger touchpad scroll pans.
-export function initCanvasView(container: HTMLElement, doc: Document): void {
+// Any other drag is a stroke, sent to `strokeListener` in document coordinates.
+export function initCanvasView(container: HTMLElement, doc: Document, strokeListener: StrokeListener): void {
   const canvas = document.createElement('canvas');
   canvas.className = 'screen-canvas';
   container.append(canvas);
@@ -132,6 +134,26 @@ export function initCanvasView(container: HTMLElement, doc: Document): void {
   });
   canvas.addEventListener('pointerup', stopPanning);
   canvas.addEventListener('pointercancel', stopPanning);
+
+  // --- Strokes: drag without Space ----------------------------------------------------------------
+  const strokes = new StrokeRecorder(viewport, strokeListener);
+
+  canvas.addEventListener('pointerdown', (event) => {
+    // Space + drag pans (handled above); only the main button draws (left click, pen or touchpad tap).
+    if (spaceDown || event.button !== 0) {
+      return;
+    }
+    strokes.begin(toCanvasPoint(event));
+  });
+  canvas.addEventListener('pointermove', (event) => {
+    strokes.add(toCanvasPoint(event));
+  });
+  // No pointer capture here, unlike panning: the canvas must get `pointerleave` to end the stroke there.
+  canvas.addEventListener('pointerup', () => strokes.end());
+  canvas.addEventListener('pointerleave', () => strokes.end());
+  canvas.addEventListener('pointercancel', () => strokes.end());
+  // Releasing the button in another window never sends pointerup here.
+  window.addEventListener('blur', () => strokes.end());
 }
 
 // Space must keep typing spaces in text fields (e.g. future dialogs).
