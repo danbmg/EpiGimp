@@ -6,7 +6,7 @@ import { Viewport, type Point } from '../render/viewport';
 const ZOOM_SPEED = 0.002;
 
 // Creates the visible canvas inside `container`, draws `doc` on it and handles navigation:
-// Ctrl + wheel zooms, Space + drag pans.
+// Ctrl + wheel zooms, Space + drag or wheel / two-finger touchpad scroll pans.
 export function initCanvasView(container: HTMLElement, doc: Document): void {
   const canvas = document.createElement('canvas');
   canvas.className = 'screen-canvas';
@@ -58,17 +58,20 @@ export function initCanvasView(container: HTMLElement, doc: Document): void {
     render();
   }).observe(canvas);
 
-  // --- Zoom: Ctrl + wheel -------------------------------------------------------------------------
+  // --- Wheel: Ctrl + wheel zooms, plain wheel pans ------------------------------------------------
   canvas.addEventListener(
     'wheel',
     (event) => {
-      if (!event.ctrlKey) {
-        return;
-      }
-      // Without this, Chromium would zoom the whole page instead.
+      // Without this, Chromium would zoom the whole page on Ctrl + wheel.
       event.preventDefault();
-      // exp() makes zooming in then out by the same wheel amount return exactly to the previous zoom.
-      viewport.zoomAt(toCanvasPoint(event), Math.exp(-event.deltaY * ZOOM_SPEED));
+      if (event.ctrlKey) {
+        // exp() makes zooming in then out by the same wheel amount return exactly to the previous zoom.
+        viewport.zoomAt(toCanvasPoint(event), Math.exp(-event.deltaY * ZOOM_SPEED));
+      } else {
+        // Two-finger scroll on a touchpad (or the mouse wheel) moves the view, like scrolling a page.
+        // Needed on laptops: the touchpad is usually disabled while a key is held, so Space + drag can't work.
+        viewport.panBy(-event.deltaX, -event.deltaY);
+      }
       requestRender();
     },
     // preventDefault() is ignored in passive listeners.
