@@ -8,7 +8,7 @@ const ZOOM_SPEED = 0.002;
 
 // Creates the visible canvas inside `container`, draws `doc` on it and handles navigation:
 // Ctrl + wheel zooms, Space + drag or wheel / two-finger touchpad scroll pans.
-// Any other drag is a stroke, sent to `strokeListener` in document coordinates.
+// Any other drag is a stroke, sent to `strokeListener` (the tools) in document coordinates.
 export function initCanvasView(container: HTMLElement, doc: Document, strokeListener: StrokeListener): void {
   const canvas = document.createElement('canvas');
   canvas.className = 'screen-canvas';
@@ -144,9 +144,15 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
       return;
     }
     strokes.begin(toCanvasPoint(event));
+    // The tool has just painted on a layer: show it.
+    requestRender();
   });
   canvas.addEventListener('pointermove', (event) => {
+    if (!strokes.isRecording) {
+      return;
+    }
     strokes.add(toCanvasPoint(event));
+    requestRender();
   });
   // No pointer capture here, unlike panning: the canvas must get `pointerleave` to end the stroke there.
   canvas.addEventListener('pointerup', () => strokes.end());

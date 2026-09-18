@@ -18,7 +18,12 @@
       </header>
 
       <aside id="toolbar" class="panel toolbar">
-        <span class="placeholder">Tools</span>
+        <button class="tool-button" data-tool="brush" title="Brush">Brush</button>
+        <button class="tool-button" data-tool="eraser" title="Eraser">Eraser</button>
+        <label class="tool-size" title="Brush size in image pixels">
+          Size
+          <input id="brush-size" type="number" step="1" />
+        </label>
       </aside>
 
       <main id="canvas-area" class="canvas-area"></main>

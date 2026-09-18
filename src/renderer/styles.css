@@ -4,6 +4,8 @@
   --bg-canvas: #1e1e1e;
   --bg-hover: #4a4a4a;
   --border: #1a1a1a;
+  --bg-active: #505050;
+  --accent: #5b8def;
   --text: #dddddd;
   --text-muted: #8a8a8a;
 
@@ -66,6 +68,8 @@ body {
   width: 100%;
   height: 100%;
   display: block;
+  /* Precise aim for painting. canvasView switches to a hand while Space is held. */
+  cursor: crosshair;
 }
 
 .layers-panel {
@@ -133,4 +137,47 @@ body {
 .menu-items button:disabled {
   color: var(--text-muted);
   cursor: default;
+}
+
+/* Toolbar: tools stacked from the top */
+.toolbar {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 6px 4px;
+}
+
+.tool-button {
+  padding: 8px 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tool-button:hover {
+  background: var(--bg-hover);
+}
+
+.tool-button[aria-pressed='true'] {
+  background: var(--bg-active);
+  border-color: var(--accent);
+}
+
+.tool-size {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tool-size input {
+  width: 100%;
+  box-sizing: border-box;
 }
