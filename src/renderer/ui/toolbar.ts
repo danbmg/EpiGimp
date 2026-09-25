@@ -1,9 +1,8 @@
 import { MAX_BRUSH_SIZE, MIN_BRUSH_SIZE, toBrushSize, type PaintSettings } from '../tools/paintTool';
 import type { ToolName, Toolbox } from '../tools/toolbox';
 
-// Left toolbar: one button per tool (the pressed one is active) and the brush size, shared by brush and eraser.
+// Barre d'outils de gauche : un bouton par outil et la taille du pinceau, partagée avec la gomme.
 export function initToolbar(toolbar: HTMLElement, toolbox: Toolbox, settings: PaintSettings): void {
-  // --- Tool buttons: `data-tool` in index.html names the tool ------------------------------------
   const buttons = [...toolbar.querySelectorAll<HTMLButtonElement>('[data-tool]')].map((button) => ({
     button,
     tool: toToolName(button.dataset.tool),
@@ -20,7 +19,6 @@ export function initToolbar(toolbar: HTMLElement, toolbox: Toolbox, settings: Pa
   });
   showActiveTool();
 
-  // --- Brush size ---------------------------------------------------------------------------------
   const sizeInput = toolbar.querySelector<HTMLInputElement>('#brush-size');
   if (!sizeInput) {
     throw new Error('#brush-size input is missing from index.html');
@@ -29,20 +27,19 @@ export function initToolbar(toolbar: HTMLElement, toolbox: Toolbox, settings: Pa
   sizeInput.max = String(MAX_BRUSH_SIZE);
   sizeInput.value = String(settings.size);
 
-  // Applied while typing or clicking the arrows, so the next stroke already uses it.
   sizeInput.addEventListener('input', () => {
     const size = toBrushSize(sizeInput.valueAsNumber);
     if (size !== null) {
       settings.size = size;
     }
   });
-  // When the field is left or Enter is pressed, show the size really used (e.g. 900 becomes 500).
+  // Si le champ contenait une valeur hors bornes, on réaffiche la taille réellement appliquée.
   sizeInput.addEventListener('change', () => {
     sizeInput.value = String(settings.size);
   });
 }
 
-// Fails at startup, rather than on click, if index.html names a tool that does not exist.
+// Échoue au démarrage plutôt qu'au clic si `index.html` référence un outil inconnu.
 function toToolName(value: string | undefined): ToolName {
   if (value !== 'brush' && value !== 'eraser') {
     throw new Error(`Unknown tool "${value}" in index.html`);

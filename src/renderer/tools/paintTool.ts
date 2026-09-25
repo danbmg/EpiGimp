@@ -5,38 +5,32 @@ import type { StrokeListener } from './strokeRecorder';
 export const MIN_BRUSH_SIZE = 1;
 export const MAX_BRUSH_SIZE = 500;
 
-/** Color used by the eraser: `destination-out` only reads its alpha, so any fully opaque color works. */
+/** Couleur de la gomme : `destination-out` ne lit que son alpha, donc une couleur opaque suffit. */
 const ERASE_COLOR = '#000000';
 
-// Shared by the brush and the eraser. The toolbar changes `size`, the color picker (#8) will change `color`.
+// Réglages partagés entre le pinceau et la gomme.
 export interface PaintSettings {
-  /** CSS color of the brush. */
   color: string;
-  /** Brush diameter in document pixels, so it covers the same part of the image at any zoom. */
   size: number;
 }
 
-// - paint: 'source-over', the default: new pixels are drawn over the old ones.
-// - erase: 'destination-out': the old pixels are kept only where nothing is drawn, so painted areas
-//   become transparent.
+// paint = dessine par-dessus ; erase = efface ce qui est dessiné (`destination-out`).
 export type PaintMode = 'paint' | 'erase';
 
-// Brush and eraser: the same code, only the compositing mode differs.
-// Paints on the active layer as the stroke goes, not on the screen: the compositor shows the result.
+// Pinceau et gomme : même code, seul le mode de mélange change.
 export class PaintTool implements StrokeListener {
   private readonly mode: PaintMode;
   private readonly getLayer: () => Layer;
   private readonly settings: PaintSettings;
 
-  // `getLayer` is called at each event, so the tool always paints on the layer that is active right now.
   constructor(mode: PaintMode, getLayer: () => Layer, settings: PaintSettings) {
     this.mode = mode;
     this.getLayer = getLayer;
     this.settings = settings;
   }
 
+  // Un clic sans bouger laisse quand même un point : un trait de longueur nulle peut ne rien dessiner.
   onStrokeStart(stroke: readonly Point[]): void {
-    // A click without moving must leave a dot: a zero-length line may draw nothing, so draw a disc.
     const point = stroke[0];
     this.draw((ctx) => {
       ctx.beginPath();
@@ -45,9 +39,8 @@ export class PaintTool implements StrokeListener {
     });
   }
 
+  // Trace uniquement le dernier segment, entre les 2 derniers points reçus.
   onStrokeMove(stroke: readonly Point[]): void {
-    // Only the newest segment: the rest of the stroke is already on the layer.
-    // Points are joined by lines, not stamped as dots, so a fast mouse leaves no gaps between two events.
     const from = stroke[stroke.length - 2];
     const to = stroke[stroke.length - 1];
     this.draw((ctx) => {
@@ -58,8 +51,7 @@ export class PaintTool implements StrokeListener {
     });
   }
 
-  // Runs `paint` on the active layer with the current settings, then restores the layer's context
-  // so the next drawing code (another tool, a filter) starts from a clean state.
+  // Applique `paint` sur le calque actif avec les réglages courants, puis restaure le contexte.
   private draw(paint: (ctx: OffscreenCanvasRenderingContext2D) => void): void {
     const ctx = this.getLayer().canvas.getContext('2d');
     if (!ctx) {
@@ -71,15 +63,13 @@ export class PaintTool implements StrokeListener {
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
     ctx.lineWidth = this.settings.size;
-    // Round ends make each segment overlap the next one smoothly, like a round brush tip.
     ctx.lineCap = 'round';
     paint(ctx);
     ctx.restore();
   }
 }
 
-// Turns what the user typed into a valid brush size: a whole number of pixels within the limits,
-// or null when it is not a number (e.g. an empty field while typing).
+// Valide la taille tapée par l'utilisateur, ou renvoie null si ce n'est pas un nombre.
 export function toBrushSize(value: number): number | null {
   if (!Number.isFinite(value)) {
     return null;

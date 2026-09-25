@@ -1,14 +1,14 @@
 import { createLayer, type Layer } from './layer';
 
-// The image being edited. In files that import it, this type hides the DOM's own `Document` type.
+// Le document édité ; ce nom masque volontairement le Document du DOM dans les fichiers qui l'importent.
 export interface Document {
   width: number;
   height: number;
-  /** Ordered bottom to top: layers[0] is drawn first, the last layer ends up on top. */
+  /** Du bas vers le haut : layers[0] est dessiné en premier. */
   layers: Layer[];
 }
 
-// A new document has a single empty (transparent) background layer of the same size.
+// Un nouveau document démarre avec un seul calque de fond vide et transparent.
 export function createDocument(width: number, height: number): Document {
   if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
     throw new RangeError(`Invalid document size: ${width}x${height}`);

@@ -3,12 +3,10 @@ import { Compositor } from '../render/compositor';
 import { Viewport, type Point } from '../render/viewport';
 import { StrokeRecorder, type StrokeListener } from '../tools/strokeRecorder';
 
-/** Zoom change per wheel pixel: one mouse wheel notch (deltaY = 100) zooms by about 22%. */
+/** Changement de zoom par pixel de molette. */
 const ZOOM_SPEED = 0.002;
 
-// Creates the visible canvas inside `container`, draws `doc` on it and handles navigation:
-// Ctrl + wheel zooms, Space + drag or wheel / two-finger touchpad scroll pans.
-// Any other drag is a stroke, sent to `strokeListener` (the tools) in document coordinates.
+// Crée le canvas visible, dessine `doc` dessus et gère la navigation (zoom, pan) et les tracés.
 export function initCanvasView(container: HTMLElement, doc: Document, strokeListener: StrokeListener): void {
   const canvas = document.createElement('canvas');
   canvas.className = 'screen-canvas';
@@ -25,7 +23,7 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
     compositor.render(doc, viewport, window.devicePixelRatio);
   };
 
-  // Input events can fire many times per frame: redraw at most once per frame.
+  // Ne redessine qu'une fois par frame, même si plusieurs events arrivent entre-temps.
   let renderScheduled = false;
   const requestRender = (): void => {
     if (renderScheduled) {
@@ -38,15 +36,12 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
     });
   };
 
-  // Screen position of a mouse event, relative to the canvas top-left corner.
   const toCanvasPoint = (event: MouseEvent): Point => {
     const rect = canvas.getBoundingClientRect();
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   };
 
-  // --- Resize ---------------------------------------------------------------------------------------
-  // The canvas buffer must have as many pixels as the canvas has on screen (CSS size x devicePixelRatio),
-  // otherwise the browser stretches it and the image gets blurry.
+  // --- Redimensionnement ------------------------------------------------------------------------------
   let documentCentered = false;
   new ResizeObserver(() => {
     const pixelRatio = window.devicePixelRatio;
@@ -56,31 +51,25 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
       viewport.centerDocument(doc.width, doc.height, canvas.clientWidth, canvas.clientHeight);
       documentCentered = true;
     }
-    // Resizing the buffer erases the canvas: redraw now rather than next frame, to avoid a blank flash.
     render();
   }).observe(canvas);
 
-  // --- Wheel: Ctrl + wheel zooms, plain wheel pans ------------------------------------------------
+  // --- Molette : Ctrl + molette zoome, molette seule déplace la vue -----------------------------------
   canvas.addEventListener(
     'wheel',
     (event) => {
-      // Without this, Chromium would zoom the whole page on Ctrl + wheel.
       event.preventDefault();
       if (event.ctrlKey) {
-        // exp() makes zooming in then out by the same wheel amount return exactly to the previous zoom.
         viewport.zoomAt(toCanvasPoint(event), Math.exp(-event.deltaY * ZOOM_SPEED));
       } else {
-        // Two-finger scroll on a touchpad (or the mouse wheel) moves the view, like scrolling a page.
-        // Needed on laptops: the touchpad is usually disabled while a key is held, so Space + drag can't work.
         viewport.panBy(-event.deltaX, -event.deltaY);
       }
       requestRender();
     },
-    // preventDefault() is ignored in passive listeners.
     { passive: false },
   );
 
-  // --- Pan: Space + drag --------------------------------------------------------------------------
+  // --- Déplacement : Espace + glisser -------------------------------------------------------------------
   let spaceDown = false;
   let lastPanPoint: Point | null = null;
 
@@ -96,7 +85,6 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
     if (event.code !== 'Space' || isTextField(event.target)) {
       return;
     }
-    // Space would otherwise press the focused button (e.g. the File menu after clicking it).
     event.preventDefault();
     spaceDown = true;
     updateCursor();
@@ -109,7 +97,6 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
     spaceDown = false;
     stopPanning();
   });
-  // Releasing Space in another window never sends keyup here: reset when the window loses focus.
   window.addEventListener('blur', () => {
     spaceDown = false;
     stopPanning();
@@ -120,7 +107,6 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
       return;
     }
     lastPanPoint = { x: event.clientX, y: event.clientY };
-    // Keep receiving pointer events even if the mouse leaves the canvas during the drag.
     canvas.setPointerCapture(event.pointerId);
     updateCursor();
   });
@@ -135,16 +121,14 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
   canvas.addEventListener('pointerup', stopPanning);
   canvas.addEventListener('pointercancel', stopPanning);
 
-  // --- Strokes: drag without Space ----------------------------------------------------------------
+  // --- Tracés : glisser sans Espace ------------------------------------------------------------------
   const strokes = new StrokeRecorder(viewport, strokeListener);
 
   canvas.addEventListener('pointerdown', (event) => {
-    // Space + drag pans (handled above); only the main button draws (left click, pen or touchpad tap).
     if (spaceDown || event.button !== 0) {
       return;
     }
     strokes.begin(toCanvasPoint(event));
-    // The tool has just painted on a layer: show it.
     requestRender();
   });
   canvas.addEventListener('pointermove', (event) => {
@@ -154,15 +138,13 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
     strokes.add(toCanvasPoint(event));
     requestRender();
   });
-  // No pointer capture here, unlike panning: the canvas must get `pointerleave` to end the stroke there.
   canvas.addEventListener('pointerup', () => strokes.end());
   canvas.addEventListener('pointerleave', () => strokes.end());
   canvas.addEventListener('pointercancel', () => strokes.end());
-  // Releasing the button in another window never sends pointerup here.
   window.addEventListener('blur', () => strokes.end());
 }
 
-// Space must keep typing spaces in text fields (e.g. future dialogs).
+// Un champ texte doit garder la touche Espace pour taper un espace, pas pour activer le déplacement.
 function isTextField(target: EventTarget | null): boolean {
   return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
 }

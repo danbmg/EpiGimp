@@ -1,16 +1,13 @@
 import type { Point, Viewport } from '../render/viewport';
 
-// Reacts to strokes as they are drawn: the brush and eraser (#6). Each method receives the stroke so far,
-// in document coordinates; the newest point is the last one.
+// Réagit à un tracé pendant qu'il se dessine : utilisé par le pinceau et la gomme (#6).
 export interface StrokeListener {
   onStrokeStart?(stroke: readonly Point[]): void;
   onStrokeMove?(stroke: readonly Point[]): void;
   onStrokeEnd?(stroke: readonly Point[]): void;
 }
 
-// Records one pointer drag as a list of points in document coordinates (image pixels).
-// It takes screen points (CSS pixels relative to the canvas, what pointer events give) and converts each one
-// with the viewport when it arrives, so points stay right at any zoom, even if the zoom changes mid-stroke.
+// Enregistre un tracé en coordonnées document, converties dès l'arrivée de chaque point.
 export class StrokeRecorder {
   private readonly viewport: Viewport;
   private readonly listener: StrokeListener;
@@ -25,14 +22,14 @@ export class StrokeRecorder {
     return this.points !== null;
   }
 
+  // Démarre un tracé ; termine d'abord le précédent si un second doigt/bouton était encore actif.
   begin(screenPoint: Point): void {
-    // A second pointer pressed during a stroke: finish the first stroke rather than lose it.
     this.end();
     this.points = [this.viewport.screenToDoc(screenPoint)];
     this.listener.onStrokeStart?.(this.points);
   }
 
-  // Ignored when no stroke is in progress: the pointer also moves with no button pressed.
+  // Ajoute un point au tracé en cours ; ignoré si aucun tracé n'a commencé.
   add(screenPoint: Point): void {
     if (!this.points) {
       return;
@@ -41,7 +38,7 @@ export class StrokeRecorder {
     this.listener.onStrokeMove?.(this.points);
   }
 
-  // Ignored when no stroke is in progress, e.g. pointerup after pointerleave already ended the stroke.
+  // Termine le tracé en cours ; ignoré s'il est déjà terminé.
   end(): void {
     if (!this.points) {
       return;

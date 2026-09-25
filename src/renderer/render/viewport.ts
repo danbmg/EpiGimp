@@ -5,14 +5,10 @@ export interface Point {
 
 export const MIN_SCALE = 0.05;
 export const MAX_SCALE = 32;
-/** Free space kept around the document when it is shrunk to fit the view (CSS pixels). */
+/** Marge gardée autour du document quand il est réduit pour tenir dans la vue (pixels CSS). */
 const FIT_MARGIN = 20;
 
-// Converts between two coordinate systems:
-// - screen: CSS pixels, relative to the top-left corner of the visible canvas (what pointer events give);
-// - document: image pixels (what layers store).
-//
-//   screen = doc * scale + offset        doc = (screen - offset) / scale
+// Convertit entre pixels écran (relatifs au canvas) et pixels document (ce que stockent les calques).
 export class Viewport {
   scale = 1;
   offsetX = 0;
@@ -32,8 +28,7 @@ export class Viewport {
     };
   }
 
-  // Multiplies the zoom by `factor` while keeping the document point under `screenPoint` in place,
-  // so the image zooms towards the mouse instead of towards its top-left corner.
+  // Zoome sans bouger le point pointé par la souris, au lieu de zoomer vers le coin en haut à gauche.
   zoomAt(screenPoint: Point, factor: number): void {
     const anchor = this.screenToDoc(screenPoint);
     this.scale = clamp(this.scale * factor, MIN_SCALE, MAX_SCALE);
@@ -46,7 +41,7 @@ export class Viewport {
     this.offsetY += dy;
   }
 
-  // Centers the document in the view, at 100% unless it is too big to fit.
+  // Centre le document dans la vue, à 100 % sauf s'il est trop grand pour tenir.
   centerDocument(docWidth: number, docHeight: number, viewWidth: number, viewHeight: number): void {
     const fitScale = Math.min(
       (viewWidth - 2 * FIT_MARGIN) / docWidth,

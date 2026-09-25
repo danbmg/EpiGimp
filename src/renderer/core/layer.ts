@@ -1,14 +1,13 @@
-// A layer is one sheet of pixels of the document. It owns its own offscreen canvas (never attached
-// to the page): tools draw on it, and the compositor copies it onto the visible canvas.
+// Un calque possède son propre canvas hors écran ; les outils dessinent dessus, le compositeur l'affiche.
 export interface Layer {
   name: string;
   canvas: OffscreenCanvas;
-  /** From 0 (invisible) to 1 (fully opaque), used as `globalAlpha` when compositing. */
+  /** De 0 (invisible) à 1 (opaque), utilisé comme opacité lors de la composition. */
   opacity: number;
   visible: boolean;
 }
 
-// A freshly created canvas is fully transparent, so a new layer starts empty.
+// Un canvas neuf est transparent : un nouveau calque démarre donc vide.
 export function createLayer(name: string, width: number, height: number): Layer {
   return {
     name,

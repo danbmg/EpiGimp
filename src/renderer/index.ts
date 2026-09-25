@@ -1,4 +1,4 @@
-// Renderer entry point: loaded by index.html and bundled by Vite.
+// Point d'entrée du renderer, chargé par index.html.
 import './styles.css';
 import { createDocument } from './core/document';
 import type { Layer } from './core/layer';
@@ -8,15 +8,13 @@ import { initCanvasView } from './ui/canvasView';
 import { initMenuBar } from './ui/menuBar';
 import { initToolbar } from './ui/toolbar';
 
-// Until File > New exists (#10), the editor starts with a blank document of this size.
 const DEFAULT_DOCUMENT_WIDTH = 800;
 const DEFAULT_DOCUMENT_HEIGHT = 600;
 const DEFAULT_BRUSH_SIZE = 10;
 
 const doc = createDocument(DEFAULT_DOCUMENT_WIDTH, DEFAULT_DOCUMENT_HEIGHT);
 
-// Until the color picker (#8) and the layers panel (#9) exist, the color is black
-// and the active layer is the only one: Background.
+// Noir et calque de fond en attendant le sélecteur de couleur (#8) et le panneau des calques (#9).
 const paintSettings: PaintSettings = { color: '#000000', size: DEFAULT_BRUSH_SIZE };
 const activeLayer = (): Layer => doc.layers[0];
 const toolbox = new Toolbox({
@@ -28,6 +26,7 @@ initMenuBar(getElement('menubar'));
 initToolbar(getElement('toolbar'), toolbox, paintSettings);
 initCanvasView(getElement('canvas-area'), doc, toolbox);
 
+// Récupère un élément de index.html, ou échoue tout de suite s'il manque.
 function getElement(id: string): HTMLElement {
   const element = document.getElementById(id);
   if (!element) {

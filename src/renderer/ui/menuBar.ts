@@ -1,5 +1,4 @@
-// Top menu bar: each `.menu` has a title button that opens/closes its dropdown.
-// File menu items stay disabled until New / Open / Export are implemented (issue #10).
+// Barre de menu du haut : chaque `.menu` a un bouton titre qui ouvre/ferme son menu déroulant.
 export function initMenuBar(menuBar: HTMLElement): void {
   const menus = menuBar.querySelectorAll<HTMLElement>('.menu');
 
@@ -16,12 +15,10 @@ export function initMenuBar(menuBar: HTMLElement): void {
       const wasOpen = title.getAttribute('aria-expanded') === 'true';
       closeAll();
       setMenuOpen(menu, !wasOpen);
-      // Keep this click from reaching the document listener below, which would close the menu again.
       event.stopPropagation();
     });
   });
 
-  // Clicking anywhere else or pressing Escape closes the open menu.
   document.addEventListener('click', closeAll);
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
@@ -30,6 +27,7 @@ export function initMenuBar(menuBar: HTMLElement): void {
   });
 }
 
+// Ouvre ou ferme un menu et affiche/masque ses items.
 function setMenuOpen(menu: HTMLElement, open: boolean): void {
   menu.querySelector('.menu-title')?.setAttribute('aria-expanded', String(open));
   const items = menu.querySelector<HTMLElement>('.menu-items');

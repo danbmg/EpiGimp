@@ -1,12 +1,12 @@
 import type { Document } from '../core/document';
 import type { Viewport } from './viewport';
 
-/** Size of one checkerboard square on screen (CSS pixels), whatever the zoom. */
+/** Taille d'une case du damier à l'écran (pixels CSS), quel que soit le zoom. */
 const CHECKER_SIZE = 8;
 const CHECKER_LIGHT = '#ffffff';
 const CHECKER_DARK = '#cccccc';
 
-// The only code that draws on the visible canvas: a checkerboard, then the visible layers on top.
+// Seul code qui dessine sur le canvas visible : le damier, puis les calques visibles par-dessus.
 export class Compositor {
   private readonly ctx: CanvasRenderingContext2D;
   private checker: { cellSize: number; pattern: CanvasPattern } | null = null;
@@ -15,30 +15,24 @@ export class Compositor {
     this.ctx = ctx;
   }
 
-  // `pixelRatio` = device pixels per CSS pixel (window.devicePixelRatio). The canvas buffer is in
-  // device pixels while the viewport is in CSS pixels, so every position and size is multiplied by it.
+  // Redessine tout : damier puis calques, du bas vers le haut, avec leur opacité.
   render(doc: Document, viewport: Viewport, pixelRatio: number): void {
     const ctx = this.ctx;
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // Top-left corner of the document and zoom, in device pixels.
     const x = viewport.offsetX * pixelRatio;
     const y = viewport.offsetY * pixelRatio;
     const scale = viewport.scale * pixelRatio;
 
-    // 1. Checkerboard under the document, so transparent pixels are visible. It is drawn without the
-    //    zoom so its squares keep the same size on screen, and anchored on the document's corner.
     ctx.setTransform(1, 0, 0, 1, x, y);
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = this.checkerPattern(Math.max(1, Math.round(CHECKER_SIZE * pixelRatio)));
     ctx.fillRect(0, 0, doc.width * scale, doc.height * scale);
 
-    // 2. Visible layers, bottom to top. This transform maps document pixels to device pixels, so each
-    //    layer is simply drawn at (0, 0) in document coordinates.
     ctx.setTransform(scale, 0, 0, scale, x, y);
-    // Zoomed in: hard-edged pixels, like GIMP. Zoomed out: smoothing avoids jagged, flickering images.
+    // Zoomé : pixels nets comme dans GIMP. Dézoomé : lissage pour éviter un rendu crénelé.
     ctx.imageSmoothingEnabled = viewport.scale < 1;
     for (const layer of doc.layers) {
       if (!layer.visible) {
@@ -50,7 +44,7 @@ export class Compositor {
     ctx.globalAlpha = 1;
   }
 
-  // The pattern is a 2x2-square tile repeated by the canvas. It is rebuilt only when the square size changes.
+  // Construit le motif du damier, reconstruit seulement si la taille des cases change.
   private checkerPattern(cellSize: number): CanvasPattern {
     if (this.checker?.cellSize === cellSize) {
       return this.checker.pattern;
