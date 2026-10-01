@@ -27,6 +27,12 @@ describe('createDocument', () => {
     expect(background.canvas.height).toBe(600);
   });
 
+  it('makes the background the active layer', () => {
+    const doc = createDocument(800, 600);
+
+    expect(doc.activeLayer).toBe(doc.layers[0]);
+  });
+
   it.each([
     [0, 600],
     [800, 0],

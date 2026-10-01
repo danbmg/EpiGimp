@@ -38,11 +38,8 @@ function makeLayer(name: string, opacity = 1, visible = true): Layer {
 }
 
 function makeDocument(): Document {
-  return {
-    width: 100,
-    height: 50,
-    layers: [makeLayer('Background'), makeLayer('Hidden', 1, false), makeLayer('Top', 0.5)],
-  };
+  const layers = [makeLayer('Background'), makeLayer('Hidden', 1, false), makeLayer('Top', 0.5)];
+  return { width: 100, height: 50, layers, activeLayer: layers[0] };
 }
 
 function makeEyedropper(pixel: number[]) {
