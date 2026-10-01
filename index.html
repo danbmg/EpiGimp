@@ -39,7 +39,17 @@
       <main id="canvas-area" class="canvas-area"></main>
 
       <aside id="layers-panel" class="panel layers-panel">
-        <span class="placeholder">Layers</span>
+        <h2 class="panel-title">Layers</h2>
+        <label class="layer-opacity" title="Opacity of the active layer">
+          Opacity
+          <input id="layer-opacity" type="range" min="0" max="100" step="1" />
+          <span id="layer-opacity-value" class="layer-opacity-value"></span>
+        </label>
+        <ul id="layer-list" class="layer-list" role="listbox" aria-label="Layers, top first"></ul>
+        <div class="layer-buttons">
+          <button id="add-layer" class="tool-button" title="Add a layer above the active one">Add</button>
+          <button id="delete-layer" class="tool-button" title="Delete the active layer">Delete</button>
+        </div>
       </aside>
     </div>
 

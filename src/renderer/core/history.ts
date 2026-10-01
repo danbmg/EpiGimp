@@ -12,8 +12,7 @@ export interface Snapshot {
 
 // Annuler / rétablir avec deux piles d'états ; ce nom masque le History du DOM dans les fichiers qui l'importent.
 export class History {
-  /** Appelé après chaque changement des piles : les boutons Undo / Redo se grisent ou non. */
-  onChange: () => void = () => undefined;
+  private readonly listeners: (() => void)[] = [];
   private undoStack: Snapshot[] = [];
   private redoStack: Snapshot[] = [];
 
@@ -25,6 +24,11 @@ export class History {
     return this.redoStack.length > 0;
   }
 
+  // `listener` sera appelé après chaque changement des piles : boutons Undo / Redo, panneau des calques.
+  subscribe(listener: () => void): void {
+    this.listeners.push(listener);
+  }
+
   // À appeler juste avant une action, avec l'état qu'elle va modifier.
   // Après une nouvelle action, ce qui avait été annulé ne peut plus être rétabli.
   record(before: Snapshot): void {
@@ -33,7 +37,7 @@ export class History {
       this.undoStack.shift();
     }
     this.redoStack = [];
-    this.onChange();
+    this.notify();
   }
 
   // Remet l'état d'avant la dernière action ; renvoie false s'il n'y a rien à annuler.
@@ -43,7 +47,7 @@ export class History {
       return false;
     }
     this.redoStack.push(snapshot.restore());
-    this.onChange();
+    this.notify();
     return true;
   }
 
@@ -54,8 +58,12 @@ export class History {
       return false;
     }
     this.undoStack.push(snapshot.restore());
-    this.onChange();
+    this.notify();
     return true;
+  }
+
+  private notify(): void {
+    this.listeners.forEach((listener) => listener());
   }
 }
 
@@ -73,14 +81,16 @@ export function snapshotLayerPixels(layer: Layer): Snapshot {
   };
 }
 
-// Sauvegarde la liste et l'ordre des calques : avant un ajout, une suppression ou un déplacement (#9).
+// Sauvegarde la liste, l'ordre des calques et le calque actif : avant un ajout, une suppression ou un déplacement (#9).
 // Les calques ne sont pas copiés : un calque supprimé reste dans la sauvegarde, avec ses pixels.
 export function snapshotLayerList(doc: Document): Snapshot {
   const layers = [...doc.layers];
+  const activeLayer = doc.activeLayer;
   return {
     restore() {
       const current = snapshotLayerList(doc);
       doc.layers = [...layers];
+      doc.activeLayer = activeLayer;
       return current;
     },
   };

@@ -132,11 +132,13 @@ describe('History state, for the Undo / Redo buttons', () => {
     expect([history.canUndo, history.canRedo]).toEqual([true, false]);
   });
 
-  it('calls onChange after each change of the stacks, and only then', () => {
+  it('calls its listeners after each change of the stacks, and only then', () => {
     const history = new History();
     const state = { value: 0 };
     let changes = 0;
-    history.onChange = () => changes++;
+    let otherChanges = 0;
+    history.subscribe(() => changes++);
+    history.subscribe(() => otherChanges++);
 
     act(history, state, 1);
     history.undo();
@@ -146,12 +148,13 @@ describe('History state, for the Undo / Redo buttons', () => {
 
     // record, undo, redo: the 2nd undo and the 2nd redo had nothing to do.
     expect(changes).toBe(3);
+    expect(otherChanges).toBe(3);
   });
 
-  it('has already updated the stacks when onChange is called', () => {
+  it('has already updated the stacks when a listener is called', () => {
     const history = new History();
     const seen: boolean[] = [];
-    history.onChange = () => seen.push(history.canUndo);
+    history.subscribe(() => seen.push(history.canUndo));
 
     act(history, { value: 0 }, 1);
     history.undo();
@@ -234,5 +237,21 @@ describe('snapshotLayerList', () => {
     history.redo();
     history.redo();
     expect(doc.layers).toEqual([top]);
+  });
+
+  it('gives back the active layer of that time', () => {
+    const doc = createDocument(10, 10);
+    const [background] = doc.layers;
+    const top = createLayer('Top', 10, 10);
+    const history = new History();
+
+    history.record(snapshotLayerList(doc));
+    doc.layers.push(top);
+    doc.activeLayer = top;
+
+    history.undo();
+    expect(doc.activeLayer).toBe(background);
+    history.redo();
+    expect(doc.activeLayer).toBe(top);
   });
 });

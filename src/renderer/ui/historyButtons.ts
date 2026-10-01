@@ -26,6 +26,6 @@ export function initHistoryButtons(toolbar: HTMLElement, history: History, view:
     undoButton.disabled = !history.canUndo;
     redoButton.disabled = !history.canRedo;
   };
-  history.onChange = showState;
+  history.subscribe(showState);
   showState();
 }
