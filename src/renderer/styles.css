@@ -347,3 +347,17 @@ body {
 .dialog-buttons button {
   padding: 4px 12px;
 }
+
+/* Filter dialog: one slider per setting, with its value on the right. */
+.dialog-slider {
+  display: grid;
+  grid-template-columns: 6em 14em 3.5em;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dialog-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

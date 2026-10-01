@@ -16,6 +16,15 @@
             <li><button role="menuitem" data-command="export-jpeg">Export as JPG…</button></li>
           </ul>
         </div>
+        <div class="menu">
+          <button class="menu-title" aria-haspopup="true" aria-expanded="false">Filters</button>
+          <ul class="menu-items" role="menu" hidden>
+            <li><button role="menuitem" data-command="grayscale">Grayscale</button></li>
+            <li><button role="menuitem" data-command="invert">Invert</button></li>
+            <li><button role="menuitem" data-command="brightness-contrast">Brightness / Contrast…</button></li>
+            <li><button role="menuitem" data-command="blur">Blur…</button></li>
+          </ul>
+        </div>
       </header>
 
       <aside id="toolbar" class="panel toolbar">
@@ -70,6 +79,17 @@
         <div class="dialog-buttons">
           <button type="button" id="new-cancel">Cancel</button>
           <button value="create">Create</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="filter-dialog" class="dialog">
+      <form method="dialog">
+        <h2 id="filter-title" class="dialog-title"></h2>
+        <div id="filter-fields"></div>
+        <div class="dialog-buttons">
+          <button type="button" id="filter-cancel">Cancel</button>
+          <button value="apply">Apply</button>
         </div>
       </form>
     </dialog>

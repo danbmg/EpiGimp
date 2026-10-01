@@ -9,6 +9,8 @@ import { Toolbox } from './tools/toolbox';
 import { initCanvasView } from './ui/canvasView';
 import { initColorPicker } from './ui/colorPicker';
 import { initFileCommands } from './ui/fileCommands';
+import { initFilterCommands } from './ui/filterCommands';
+import { initFilterDialog } from './ui/filterDialog';
 import { initHistoryButtons } from './ui/historyButtons';
 import { initLayersPanel } from './ui/layersPanel';
 import { initMenuBar } from './ui/menuBar';
@@ -43,7 +45,11 @@ initHistoryShortcuts(history, canvasView);
 initHistoryButtons(toolbar, history, canvasView);
 initLayersPanel(getElement('layers-panel'), doc, history, canvasView);
 const newDialog = initNewDocumentDialog(getElement('new-dialog'));
-initMenuBar(getElement('menubar'), initFileCommands(newDialog, doc, history, canvasView));
+const filterDialog = initFilterDialog(getElement('filter-dialog'));
+initMenuBar(getElement('menubar'), {
+  ...initFileCommands(newDialog, doc, history, canvasView),
+  ...initFilterCommands(filterDialog, doc, history, canvasView),
+});
 
 // Récupère un élément de index.html, ou échoue tout de suite s'il manque.
 function getElement(id: string): HTMLElement {
