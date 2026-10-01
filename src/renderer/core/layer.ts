@@ -16,3 +16,12 @@ export function createLayer(name: string, width: number, height: number): Layer 
     visible: true,
   };
 }
+
+// Contexte 2D du calque : pour y peindre (outils, filtres) ou lire et remettre ses pixels (historique).
+export function getLayerContext(layer: Layer): OffscreenCanvasRenderingContext2D {
+  const ctx = layer.canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('2D context is not available for the layer canvas');
+  }
+  return ctx;
+}
