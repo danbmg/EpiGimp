@@ -168,7 +168,22 @@ body {
   border-color: var(--accent);
 }
 
-.tool-size {
+.tool-button:disabled {
+  opacity: 0.4;
+  background: none;
+  cursor: default;
+}
+
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.tool-field {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -177,7 +192,19 @@ body {
   color: var(--text-muted);
 }
 
-.tool-size input {
+.tool-field input {
   width: 100%;
   box-sizing: border-box;
+}
+
+.tool-field input[type='color'] {
+  height: 28px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.tool-color-value {
+  color: var(--text);
+  font-family: monospace;
+  text-align: center;
 }

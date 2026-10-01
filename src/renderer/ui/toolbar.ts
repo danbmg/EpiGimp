@@ -1,7 +1,8 @@
 import { MAX_BRUSH_SIZE, MIN_BRUSH_SIZE, toBrushSize, type PaintSettings } from '../tools/paintTool';
-import type { ToolName, Toolbox } from '../tools/toolbox';
+import { isToolName, type ToolName, type Toolbox } from '../tools/toolbox';
 
 // Barre d'outils de gauche : un bouton par outil et la taille du pinceau, partagée avec la gomme.
+// La couleur a son propre module (`colorPicker.ts`) : la pipette doit pouvoir la changer.
 export function initToolbar(toolbar: HTMLElement, toolbox: Toolbox, settings: PaintSettings): void {
   const buttons = [...toolbar.querySelectorAll<HTMLButtonElement>('[data-tool]')].map((button) => ({
     button,
@@ -41,7 +42,7 @@ export function initToolbar(toolbar: HTMLElement, toolbox: Toolbox, settings: Pa
 
 // Échoue au démarrage plutôt qu'au clic si `index.html` référence un outil inconnu.
 function toToolName(value: string | undefined): ToolName {
-  if (value !== 'brush' && value !== 'eraser') {
+  if (!isToolName(value)) {
     throw new Error(`Unknown tool "${value}" in index.html`);
   }
   return value;

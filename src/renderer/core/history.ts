@@ -12,8 +12,18 @@ export interface Snapshot {
 
 // Annuler / rétablir avec deux piles d'états ; ce nom masque le History du DOM dans les fichiers qui l'importent.
 export class History {
+  /** Appelé après chaque changement des piles : les boutons Undo / Redo se grisent ou non. */
+  onChange: () => void = () => undefined;
   private undoStack: Snapshot[] = [];
   private redoStack: Snapshot[] = [];
+
+  get canUndo(): boolean {
+    return this.undoStack.length > 0;
+  }
+
+  get canRedo(): boolean {
+    return this.redoStack.length > 0;
+  }
 
   // À appeler juste avant une action, avec l'état qu'elle va modifier.
   // Après une nouvelle action, ce qui avait été annulé ne peut plus être rétabli.
@@ -23,6 +33,7 @@ export class History {
       this.undoStack.shift();
     }
     this.redoStack = [];
+    this.onChange();
   }
 
   // Remet l'état d'avant la dernière action ; renvoie false s'il n'y a rien à annuler.
@@ -32,6 +43,7 @@ export class History {
       return false;
     }
     this.redoStack.push(snapshot.restore());
+    this.onChange();
     return true;
   }
 
@@ -42,6 +54,7 @@ export class History {
       return false;
     }
     this.undoStack.push(snapshot.restore());
+    this.onChange();
     return true;
   }
 }

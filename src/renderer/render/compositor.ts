@@ -34,14 +34,7 @@ export class Compositor {
     ctx.setTransform(scale, 0, 0, scale, x, y);
     // Zoomé : pixels nets comme dans GIMP. Dézoomé : lissage pour éviter un rendu crénelé.
     ctx.imageSmoothingEnabled = viewport.scale < 1;
-    for (const layer of doc.layers) {
-      if (!layer.visible) {
-        continue;
-      }
-      ctx.globalAlpha = layer.opacity;
-      ctx.drawImage(layer.canvas, 0, 0);
-    }
-    ctx.globalAlpha = 1;
+    drawLayers(ctx, doc);
   }
 
   // Construit le motif du damier, reconstruit seulement si la taille des cases change.
@@ -67,4 +60,17 @@ export class Compositor {
     this.checker = { cellSize, pattern };
     return pattern;
   }
+}
+
+// Superpose les calques visibles du bas vers le haut, chacun avec son opacité.
+// Partagé avec la pipette (#8), pour qu'elle lise exactement l'image affichée.
+export function drawLayers(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, doc: Document): void {
+  for (const layer of doc.layers) {
+    if (!layer.visible) {
+      continue;
+    }
+    ctx.globalAlpha = layer.opacity;
+    ctx.drawImage(layer.canvas, 0, 0);
+  }
+  ctx.globalAlpha = 1;
 }
