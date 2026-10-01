@@ -118,6 +118,48 @@ describe('History', () => {
   });
 });
 
+describe('History state, for the Undo / Redo buttons', () => {
+  it('tells whether there is something to undo or redo', () => {
+    const history = new History();
+    const state = { value: 0 };
+    expect([history.canUndo, history.canRedo]).toEqual([false, false]);
+
+    act(history, state, 1);
+    expect([history.canUndo, history.canRedo]).toEqual([true, false]);
+    history.undo();
+    expect([history.canUndo, history.canRedo]).toEqual([false, true]);
+    history.redo();
+    expect([history.canUndo, history.canRedo]).toEqual([true, false]);
+  });
+
+  it('calls onChange after each change of the stacks, and only then', () => {
+    const history = new History();
+    const state = { value: 0 };
+    let changes = 0;
+    history.onChange = () => changes++;
+
+    act(history, state, 1);
+    history.undo();
+    history.undo();
+    history.redo();
+    history.redo();
+
+    // record, undo, redo: the 2nd undo and the 2nd redo had nothing to do.
+    expect(changes).toBe(3);
+  });
+
+  it('has already updated the stacks when onChange is called', () => {
+    const history = new History();
+    const seen: boolean[] = [];
+    history.onChange = () => seen.push(history.canUndo);
+
+    act(history, { value: 0 }, 1);
+    history.undo();
+
+    expect(seen).toEqual([true, false]);
+  });
+});
+
 // Layer whose fake context holds its pixels in a plain array, so a test can paint and read them back.
 function makePixelLayer() {
   const image = { pixels: [0, 0, 0, 0] };

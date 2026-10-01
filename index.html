@@ -20,10 +20,20 @@
       <aside id="toolbar" class="panel toolbar">
         <button class="tool-button" data-tool="brush" title="Brush">Brush</button>
         <button class="tool-button" data-tool="eraser" title="Eraser">Eraser</button>
-        <label class="tool-size" title="Brush size in image pixels">
+        <button class="tool-button" data-tool="eyedropper" title="Eyedropper: pick a color from the image">Picker</button>
+        <label class="tool-field" title="Brush size in image pixels">
           Size
           <input id="brush-size" type="number" step="1" />
         </label>
+        <label class="tool-field" title="Current color">
+          Color
+          <input id="brush-color" type="color" />
+          <span id="brush-color-value" class="tool-color-value"></span>
+        </label>
+        <div class="tool-group">
+          <button id="undo-button" class="tool-button" title="Undo (Ctrl+Z)">Undo</button>
+          <button id="redo-button" class="tool-button" title="Redo (Ctrl+Y)">Redo</button>
+        </div>
       </aside>
 
       <main id="canvas-area" class="canvas-area"></main>

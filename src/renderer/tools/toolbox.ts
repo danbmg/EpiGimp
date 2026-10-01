@@ -1,7 +1,13 @@
 import type { Point } from '../render/viewport';
 import type { StrokeListener } from './strokeRecorder';
 
-export type ToolName = 'brush' | 'eraser';
+export const TOOL_NAMES = ['brush', 'eraser', 'eyedropper'] as const;
+export type ToolName = (typeof TOOL_NAMES)[number];
+
+// Vrai si `value` est le nom d'un outil existant.
+export function isToolName(value: string | undefined): value is ToolName {
+  return TOOL_NAMES.some((name) => name === value);
+}
 
 // Garde tous les outils et transmet chaque tracé à celui sélectionné dans la barre d'outils.
 export class Toolbox implements StrokeListener {
