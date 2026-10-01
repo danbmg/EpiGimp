@@ -310,3 +310,40 @@ body {
 .layer-buttons .tool-button {
   flex: 1;
 }
+
+/* New image dialog. */
+.dialog {
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-panel);
+  color: var(--text);
+}
+
+.dialog::backdrop {
+  background: rgb(0 0 0 / 40%);
+}
+
+.dialog-title {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.dialog-field {
+  display: grid;
+  grid-template-columns: 4em 6em auto;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dialog-buttons button {
+  padding: 4px 12px;
+}

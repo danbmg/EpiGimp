@@ -12,6 +12,8 @@ export interface CanvasView {
   requestRender(): void;
   /** Vrai tant qu'un tracé est en cours (bouton enfoncé). */
   readonly isDrawing: boolean;
+  /** Recentre la vue et ajuste le zoom pour voir tout le document (après New / Open). */
+  fitDocument(): void;
 }
 
 // Crée le canvas visible, dessine `doc` dessus et gère la navigation (zoom, pan) et les tracés.
@@ -155,6 +157,10 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
     requestRender,
     get isDrawing() {
       return strokes.isRecording;
+    },
+    fitDocument() {
+      viewport.centerDocument(doc.width, doc.height, canvas.clientWidth, canvas.clientHeight);
+      requestRender();
     },
   };
 }

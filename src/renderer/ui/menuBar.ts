@@ -1,5 +1,6 @@
 // Barre de menu du haut : chaque `.menu` a un bouton titre qui ouvre/ferme son menu déroulant.
-export function initMenuBar(menuBar: HTMLElement): void {
+// Chaque item `data-command="x"` lance `commands.x`.
+export function initMenuBar(menuBar: HTMLElement, commands: Record<string, () => void>): void {
   const menus = menuBar.querySelectorAll<HTMLElement>('.menu');
 
   const closeAll = (): void => {
@@ -16,6 +17,18 @@ export function initMenuBar(menuBar: HTMLElement): void {
       closeAll();
       setMenuOpen(menu, !wasOpen);
       event.stopPropagation();
+    });
+  });
+
+  // Échoue au démarrage plutôt qu'au clic si `index.html` référence une commande inconnue.
+  menuBar.querySelectorAll<HTMLElement>('[data-command]').forEach((item) => {
+    const command = commands[item.dataset.command ?? ''];
+    if (!command) {
+      throw new Error(`Unknown menu command "${item.dataset.command}" in index.html`);
+    }
+    item.addEventListener('click', () => {
+      closeAll();
+      command();
     });
   });
 

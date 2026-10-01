@@ -10,9 +10,10 @@
         <div class="menu">
           <button class="menu-title" aria-haspopup="true" aria-expanded="false">File</button>
           <ul class="menu-items" role="menu" hidden>
-            <li><button role="menuitem" disabled>New…</button></li>
-            <li><button role="menuitem" disabled>Open…</button></li>
-            <li><button role="menuitem" disabled>Export…</button></li>
+            <li><button role="menuitem" data-command="new">New…</button></li>
+            <li><button role="menuitem" data-command="open">Open…</button></li>
+            <li><button role="menuitem" data-command="export-png">Export as PNG…</button></li>
+            <li><button role="menuitem" data-command="export-jpeg">Export as JPG…</button></li>
           </ul>
         </div>
       </header>
@@ -52,6 +53,26 @@
         </div>
       </aside>
     </div>
+
+    <dialog id="new-dialog" class="dialog">
+      <form method="dialog">
+        <h2 class="dialog-title">New image</h2>
+        <label class="dialog-field">
+          Width
+          <input id="new-width" type="number" min="1" step="1" required />
+          px
+        </label>
+        <label class="dialog-field">
+          Height
+          <input id="new-height" type="number" min="1" step="1" required />
+          px
+        </label>
+        <div class="dialog-buttons">
+          <button type="button" id="new-cancel">Cancel</button>
+          <button value="create">Create</button>
+        </div>
+      </form>
+    </dialog>
 
     <script type="module" src="/src/renderer/index.ts"></script>
   </body>

@@ -62,6 +62,13 @@ export class History {
     return true;
   }
 
+  // Oublie tout (New, Open) : on ne peut pas annuler vers une image d'une autre taille.
+  clear(): void {
+    this.undoStack = [];
+    this.redoStack = [];
+    this.notify();
+  }
+
   private notify(): void {
     this.listeners.forEach((listener) => listener());
   }
