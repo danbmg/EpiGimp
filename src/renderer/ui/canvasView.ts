@@ -159,7 +159,14 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
   };
 }
 
+/** Les types de <input> où l'on tape du texte. */
+const TEXT_INPUT_TYPES = new Set(['text', 'number', 'search']);
+
 // Un champ texte garde ses touches pour l'édition : Espace tape un espace, Ctrl+Z annule la frappe.
+// Un curseur ou le sélecteur de couleur gardent le focus après usage, mais Ctrl+Z doit y annuler le dessin.
 export function isTextField(target: EventTarget | null): boolean {
-  return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
+  return (
+    target instanceof HTMLTextAreaElement ||
+    (target instanceof HTMLInputElement && TEXT_INPUT_TYPES.has(target.type))
+  );
 }

@@ -9,6 +9,7 @@ import { Toolbox } from './tools/toolbox';
 import { initCanvasView } from './ui/canvasView';
 import { initColorPicker } from './ui/colorPicker';
 import { initHistoryButtons } from './ui/historyButtons';
+import { initLayersPanel } from './ui/layersPanel';
 import { initMenuBar } from './ui/menuBar';
 import { initHistoryShortcuts } from './ui/shortcuts';
 import { initToolbar } from './ui/toolbar';
@@ -21,9 +22,9 @@ const DEFAULT_COLOR = '#000000';
 const doc = createDocument(DEFAULT_DOCUMENT_WIDTH, DEFAULT_DOCUMENT_HEIGHT);
 const history = new History();
 
-// Calque de fond en attendant le panneau des calques (#9).
 const paintSettings: PaintSettings = { color: DEFAULT_COLOR, size: DEFAULT_BRUSH_SIZE };
-const activeLayer = (): Layer => doc.layers[0];
+// Relu à chaque coup de pinceau : les outils peignent sur le calque choisi dans le panneau.
+const activeLayer = (): Layer => doc.activeLayer;
 
 // Créé avant les outils : la pipette lui envoie la couleur qu'elle a lue.
 const toolbar = getElement('toolbar');
@@ -39,6 +40,7 @@ initToolbar(toolbar, toolbox, paintSettings);
 const canvasView = initCanvasView(getElement('canvas-area'), doc, toolbox);
 initHistoryShortcuts(history, canvasView);
 initHistoryButtons(toolbar, history, canvasView);
+initLayersPanel(getElement('layers-panel'), doc, history, canvasView);
 
 // Récupère un élément de index.html, ou échoue tout de suite s'il manque.
 function getElement(id: string): HTMLElement {
