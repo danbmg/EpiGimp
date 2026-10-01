@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { History } from '../../src/renderer/core/history';
 import type { Layer } from '../../src/renderer/core/layer';
 import {
   MAX_BRUSH_SIZE,
@@ -15,9 +16,11 @@ type State = Record<(typeof STATE_KEYS)[number], unknown>;
 
 // Fake 2D context that records the path calls, and the drawing state at each fill() / stroke().
 // save() / restore() work like the real ones, so a test can check the tool leaves no state behind.
+// getImageData() returns a new numbered image each time, so a test can tell which one putImageData() gets back.
 function makeRecordingContext() {
   const calls: Call[] = [];
   const saved: State[] = [];
+  let images = 0;
   const ctx = {
     globalCompositeOperation: 'source-over',
     fillStyle: '#000000',
@@ -45,6 +48,12 @@ function makeRecordingContext() {
     stroke() {
       calls.push(['stroke', this.state()]);
     },
+    getImageData() {
+      const image = { id: ++images };
+      calls.push(['getImageData', image]);
+      return image;
+    },
+    putImageData: (image: unknown) => calls.push(['putImageData', image]),
   };
   return { ctx, calls };
 }
@@ -58,7 +67,8 @@ function makeLayer(name: string) {
 
 function makeTool(mode: 'paint' | 'erase', settings: PaintSettings = { color: '#ff0000', size: 8 }) {
   const target = makeLayer('Background');
-  return { ...target, settings, tool: new PaintTool(mode, () => target.layer, settings) };
+  const history = new History();
+  return { ...target, settings, history, tool: new PaintTool(mode, () => target.layer, settings, history) };
 }
 
 describe('PaintTool brush', () => {
@@ -114,7 +124,7 @@ describe('PaintTool brush', () => {
     const first = makeLayer('First');
     const second = makeLayer('Second');
     let active = first.layer;
-    const tool = new PaintTool('paint', () => active, { color: '#000000', size: 4 });
+    const tool = new PaintTool('paint', () => active, { color: '#000000', size: 4 }, new History());
 
     tool.onStrokeStart([{ x: 1, y: 1 }]);
     active = second.layer;
@@ -162,6 +172,39 @@ describe('PaintTool eraser', () => {
         lineWidth: 12,
       });
     }
+  });
+});
+
+describe('PaintTool history', () => {
+  it('saves the layer before the first dab, so one undo removes the whole stroke', () => {
+    const { tool, history, calls } = makeTool('paint');
+
+    tool.onStrokeStart([{ x: 1, y: 1 }]);
+    tool.onStrokeMove([
+      { x: 1, y: 1 },
+      { x: 5, y: 5 },
+    ]);
+    tool.onStrokeMove([
+      { x: 1, y: 1 },
+      { x: 5, y: 5 },
+      { x: 9, y: 9 },
+    ]);
+
+    expect(calls[0]).toEqual(['getImageData', { id: 1 }]);
+    expect(history.undo()).toBe(true);
+    expect(calls.at(-1)).toEqual(['putImageData', { id: 1 }]);
+    expect(history.undo()).toBe(false);
+  });
+
+  it('records one undo step per stroke, for the eraser too', () => {
+    const { tool, history } = makeTool('erase');
+
+    tool.onStrokeStart([{ x: 1, y: 1 }]);
+    tool.onStrokeStart([{ x: 2, y: 2 }]);
+
+    expect(history.undo()).toBe(true);
+    expect(history.undo()).toBe(true);
+    expect(history.undo()).toBe(false);
   });
 });
 
