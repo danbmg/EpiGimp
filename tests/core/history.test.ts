@@ -163,6 +163,25 @@ describe('History state, for the Undo / Redo buttons', () => {
   });
 });
 
+describe('History.clear', () => {
+  it('forgets everything, and tells its listeners', () => {
+    const history = new History();
+    const state = { value: 0 };
+    act(history, state, 1);
+    act(history, state, 2);
+    history.undo();
+    let changes = 0;
+    history.subscribe(() => changes++);
+
+    history.clear();
+
+    expect([history.canUndo, history.canRedo]).toEqual([false, false]);
+    expect(history.undo()).toBe(false);
+    expect(state.value).toBe(1);
+    expect(changes).toBe(1);
+  });
+});
+
 // Layer whose fake context holds its pixels in a plain array, so a test can paint and read them back.
 function makePixelLayer() {
   const image = { pixels: [0, 0, 0, 0] };

@@ -8,9 +8,11 @@ import { PaintTool, type PaintSettings } from './tools/paintTool';
 import { Toolbox } from './tools/toolbox';
 import { initCanvasView } from './ui/canvasView';
 import { initColorPicker } from './ui/colorPicker';
+import { initFileCommands } from './ui/fileCommands';
 import { initHistoryButtons } from './ui/historyButtons';
 import { initLayersPanel } from './ui/layersPanel';
 import { initMenuBar } from './ui/menuBar';
+import { initNewDocumentDialog } from './ui/newDocumentDialog';
 import { initHistoryShortcuts } from './ui/shortcuts';
 import { initToolbar } from './ui/toolbar';
 
@@ -35,12 +37,13 @@ const toolbox = new Toolbox({
   eyedropper: new Eyedropper(doc, (color) => colorPicker.setColor(color)),
 });
 
-initMenuBar(getElement('menubar'));
 initToolbar(toolbar, toolbox, paintSettings);
 const canvasView = initCanvasView(getElement('canvas-area'), doc, toolbox);
 initHistoryShortcuts(history, canvasView);
 initHistoryButtons(toolbar, history, canvasView);
 initLayersPanel(getElement('layers-panel'), doc, history, canvasView);
+const newDialog = initNewDocumentDialog(getElement('new-dialog'));
+initMenuBar(getElement('menubar'), initFileCommands(newDialog, doc, history, canvasView));
 
 // Récupère un élément de index.html, ou échoue tout de suite s'il manque.
 function getElement(id: string): HTMLElement {

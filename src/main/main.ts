@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
+import { registerFileHandlers } from './ipc';
 
 // Sous Windows, l'installeur Squirrel relance l'app pendant l'install/désinstall : on quitte direct.
 if (started) {
@@ -40,6 +41,7 @@ const createWindow = (): void => {
 app.on('ready', () => {
   // Le menu de l'éditeur est dessiné en HTML : on retire le menu natif d'Electron.
   Menu.setApplicationMenu(null);
+  registerFileHandlers();
   createWindow();
 });
 
