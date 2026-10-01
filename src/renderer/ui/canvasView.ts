@@ -6,8 +6,16 @@ import { StrokeRecorder, type StrokeListener } from '../tools/strokeRecorder';
 /** Changement de zoom par pixel de molette. */
 const ZOOM_SPEED = 0.002;
 
+// Ce que le reste de l'interface peut demander à la vue.
+export interface CanvasView {
+  /** Redessine l'écran à la prochaine image, après un changement du document fait hors d'un tracé. */
+  requestRender(): void;
+  /** Vrai tant qu'un tracé est en cours (bouton enfoncé). */
+  readonly isDrawing: boolean;
+}
+
 // Crée le canvas visible, dessine `doc` dessus et gère la navigation (zoom, pan) et les tracés.
-export function initCanvasView(container: HTMLElement, doc: Document, strokeListener: StrokeListener): void {
+export function initCanvasView(container: HTMLElement, doc: Document, strokeListener: StrokeListener): CanvasView {
   const canvas = document.createElement('canvas');
   canvas.className = 'screen-canvas';
   container.append(canvas);
@@ -142,9 +150,16 @@ export function initCanvasView(container: HTMLElement, doc: Document, strokeList
   canvas.addEventListener('pointerleave', () => strokes.end());
   canvas.addEventListener('pointercancel', () => strokes.end());
   window.addEventListener('blur', () => strokes.end());
+
+  return {
+    requestRender,
+    get isDrawing() {
+      return strokes.isRecording;
+    },
+  };
 }
 
-// Un champ texte doit garder la touche Espace pour taper un espace, pas pour activer le déplacement.
-function isTextField(target: EventTarget | null): boolean {
+// Un champ texte garde ses touches pour l'édition : Espace tape un espace, Ctrl+Z annule la frappe.
+export function isTextField(target: EventTarget | null): boolean {
   return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
 }

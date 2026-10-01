@@ -1,4 +1,5 @@
-import type { Layer } from '../core/layer';
+import { snapshotLayerPixels, type History } from '../core/history';
+import { getLayerContext, type Layer } from '../core/layer';
 import type { Point } from '../render/viewport';
 import type { StrokeListener } from './strokeRecorder';
 
@@ -22,15 +23,19 @@ export class PaintTool implements StrokeListener {
   private readonly mode: PaintMode;
   private readonly getLayer: () => Layer;
   private readonly settings: PaintSettings;
+  private readonly history: History;
 
-  constructor(mode: PaintMode, getLayer: () => Layer, settings: PaintSettings) {
+  constructor(mode: PaintMode, getLayer: () => Layer, settings: PaintSettings, history: History) {
     this.mode = mode;
     this.getLayer = getLayer;
     this.settings = settings;
+    this.history = history;
   }
 
+  // Sauvegarde le calque avant le premier point : un Ctrl+Z efface ensuite tout le tracé d'un coup.
   // Un clic sans bouger laisse quand même un point : un trait de longueur nulle peut ne rien dessiner.
   onStrokeStart(stroke: readonly Point[]): void {
+    this.history.record(snapshotLayerPixels(this.getLayer()));
     const point = stroke[0];
     this.draw((ctx) => {
       ctx.beginPath();
@@ -53,10 +58,7 @@ export class PaintTool implements StrokeListener {
 
   // Applique `paint` sur le calque actif avec les réglages courants, puis restaure le contexte.
   private draw(paint: (ctx: OffscreenCanvasRenderingContext2D) => void): void {
-    const ctx = this.getLayer().canvas.getContext('2d');
-    if (!ctx) {
-      throw new Error('2D context is not available for the layer canvas');
-    }
+    const ctx = getLayerContext(this.getLayer());
     const color = this.mode === 'erase' ? ERASE_COLOR : this.settings.color;
     ctx.save();
     ctx.globalCompositeOperation = this.mode === 'erase' ? 'destination-out' : 'source-over';
