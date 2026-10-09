@@ -13,7 +13,8 @@ export function initHistoryShortcuts(history: History, view: CanvasView): void {
     }
     event.preventDefault();
     // Annuler en plein tracé remettrait l'ancien calque sous un tracé qui continue de peindre.
-    if (view.isDrawing) {
+    // Pareil pendant une boîte de dialogue : le calque y montre l'aperçu d'un filtre, pas son vrai contenu.
+    if (view.isDrawing || document.querySelector('dialog[open]')) {
       return;
     }
     const changed = key === 'z' ? history.undo() : history.redo();
